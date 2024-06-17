@@ -5,6 +5,7 @@
 
 import numpy as np
 import cv2
+import math
 
 # Load image and resize for better display
 img = cv2.imread("./tutorials/data/images/nl_clown.jpg", cv2.IMREAD_COLOR)
@@ -12,17 +13,17 @@ img = cv2.resize(img, (400, 400), interpolation=cv2.INTER_CUBIC)
 rows, cols, dims = img.shape
 
 # TODO Define translation matrix for translation about 100 pixels to the right and 50 up
-T_translation = 'tbd'
+T_translation = np.float32([[1, 0, 100], [0, 1, -50]])
 
 # A pretty print for the matrix:
 print("\nTranslation\n", "\n".join(["\t".join(["%03.3f" % cell for cell in row]) for row in T_translation]))
 
 # TODO Apply translation matrix on image using cv2.warpAffine
-dst_translation = 'tbd'
+dst_translation = cv2.warpAffine(img, T_translation, (cols + 100, rows + 50))
 
 # TODO Define anisotropic scaling matrix that stretches to double length horizontally
 # and squeezes vertically to the half height
-T_anisotropic_scaling = "tbd"
+T_anisotropic_scaling = np.float32([[2, 0, 0], [0, 0.5, 0]])
 
 print(
     "\nAnisotropic scaling\n",
@@ -33,7 +34,10 @@ print(
 dst_anisotropic_scaling = "tbd"
 
 # TODO Define rotation matrix for 45° clockwise rotation
-T_rotation = "tbd"
+cos = math.cos(math.radians(45))
+minus_sin = math.a
+sin =
+T_rotation = np.float32([[, ], [, ]])
 
 print("\nRotation\n", "\n".join(["\t".join(["%03.3f" % cell for cell in row]) for row in T_rotation]))
 

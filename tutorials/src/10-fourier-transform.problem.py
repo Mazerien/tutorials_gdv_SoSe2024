@@ -12,28 +12,63 @@ window_width = 640
 window_height = 480
 
 # TODO Implement the function get_frequencies(image):
-# Convert image to floats and do dft saving as complex output
 
-# Apply shift of origin from upper left corner to center of image
+def get_frequencies(image):
+    # Convert image to floats and do dft saving as complex output
 
-# Extract magnitude and phase images
+    image_32F = np.float32(image)
 
-# Get spectrum for viewing only
+    freqencies = cv2.dft(image_32F, flags= cv2.DFT_COMPLEX_OUTPUT)
+   
+    # Apply shift of origin from upper left corner to center of image
 
-# Return the resulting image (as well as the magnitude and phase for the inverse)
+    frequencies_shift = np.fft.fftshift(freqencies)
+
+    # Extract magnitude and phase images
+
+    magnitude, phase = cv2.cartToPolar(frequencies_shift[:,:,0], frequencies_shift[:,:,1])
+
+    # Get spectrum for viewing only
+
+    spectrum =np.log(magnitude) / 30
+
+    normalised_spectrum = cv2.normalize(spectrum, spectrum, 0.0, 1.0, cv2.NORM_MINMAX) 
+
+    # Return the resulting image (as well as the magnitude and phase for the inverse)
+    return normalised_spectrum, magnitude, phase
 
 # TODO Implement the function create_from_spectrum():
-# Convert magnitude and phase into cartesian real and imaginary components
 
-# Combine cartesian components into one complex image
+def create_from_spectrum(magnitude, phase):
+    # Convert magnitude and phase into cartesian real and imaginary components
 
-# Shift origin from center to upper left corner
+    # magnitude =cv2.pow(magnitude, 1.1)
 
-# Do idft saving as complex output
+    real, imaginary = cv2.polarToCart(magnitude, phase)
 
-# Combine complex components into original image again
+    # Combine cartesian components into one complex image
 
-# Re-normalize to 8-bits
+    back = cv2.merge([real, imaginary])
+
+    # Shift origin from center to upper left corner
+
+    back_shifted = np.fft.ifftshift(back)
+
+    # Do idft saving as complex output
+
+    image_back = cv2.idft(back_shifted)
+
+    # Combine complex components into original image again
+
+    image_back = cv2.magnitude(image_back[:,:,0], image_back[:,:,1])
+
+    #   Re-normalize to 8-bits
+    min, max = np.amin(image_back, (0,1)), np.amax(image_back, (0,1))
+    print(min, max)
+    image_back = cv2.normalize(image_back, None, alpha=0, beta=255, norm_type=cv2.NORM_MINMAX, dtype=cv2.CV_8U)
+
+    return image_back
+
 
 
 # We use a main function this time: see https://realpython.com/python-main-function/ why it makes sense
@@ -52,7 +87,7 @@ def main():
     cv2.resizeWindow(title_original, window_width, window_height)
     cv2.imshow(title_original, image)
 
-    # result = get_frequencies(image)
+    result, manitude, phase = get_frequencies(image)
     result = np.zeros((window_height, window_width), np.uint8)
 
     # Show the resulting image
@@ -62,7 +97,7 @@ def main():
     cv2.resizeWindow(title_result, window_width, window_height)
     cv2.imshow(title_result, result)
 
-    # back = create_from_spectrum(??)
+    back = create_from_spectrum(manitude, phase)
     back = np.zeros((window_height, window_width), np.uint8)
 
     # And compute image back from frequencies
